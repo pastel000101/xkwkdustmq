@@ -1,0 +1,57 @@
+# ============================================================
+# .gitignore — 영어 타자연습
+# ------------------------------------------------------------
+# 이 프로젝트는 빌드 산출물이 없다 (NFR-003).
+# 소스가 곧 실행 파일이므로 무시할 대상은 OS·편집기 부산물뿐이다.
+# ============================================================
+
+# ---- 개발 과정 문서 (저장소에 올리지 않음) ----
+# 설계·요구사항·감사 로그는 로컬에만 둔다.
+# 저장소에는 실제로 동작하는 앱만 올린다.
+aidlc-docs/
+.aidlc-rule-details/
+CLAUDE.md
+
+# ---- OS 부산물 ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ---- 편집기 · IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ---- 로그 · 임시 파일 ----
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# ---- Node (현재 미사용, 나중에 도구를 추가할 경우 대비) ----
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# ---- 비밀정보 (실수 방지) ----
+# 이 프로젝트는 API 키나 자격 증명을 쓰지 않는다.
+# 아래는 실수로 만들어졌을 때를 대비한 안전망이다.
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+credentials.json

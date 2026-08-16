@@ -1,0 +1,330 @@
+/* ============================================================
+ * style.css — 전역 스타일
+ * ------------------------------------------------------------
+ * 웹폰트를 쓰지 않는다 (NFR-001). 시스템 폰트만 사용.
+ * 라이트/다크 모두에서 본문 대비 4.5:1 이상을 목표로 한다.
+ * ============================================================ */
+
+:root {
+  --bg:          #fbfbfc;
+  --panel:       #ffffff;
+  --panel-2:     #f2f3f5;
+  --fg:          #16181d;
+  --fg-dim:      #5c6270;
+  --line:        #dfe1e6;
+  --accent:      #2563eb;
+  --accent-fg:   #ffffff;
+  --ok:          #15803d;
+  --err:         #c62828;
+  --err-bg:      rgba(198, 40, 40, .10);
+  --warn:        #a16207;
+  --warn-bg:     rgba(161, 98, 7, .10);
+
+  /* 표시 부류별 색 — 음소와 철자 정보를 다른 색으로 (U2-3) */
+  --mark-phoneme:  #7c3aed;
+  --mark-spelling: #6b7280;
+  --stress-bg:     rgba(37, 99, 235, .13);
+
+  --radius: 7px;
+  --font: "Malgun Gothic", "맑은 고딕", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono: Consolas, "D2Coding", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #14161a;
+    --panel:     #1b1e24;
+    --panel-2:   #23272e;
+    --fg:        #e8eaed;
+    --fg-dim:    #9aa1ac;
+    --line:      #333842;
+    --accent:    #60a5fa;
+    --accent-fg: #0b1220;
+    --ok:        #4ade80;
+    --err:       #f87171;
+    --err-bg:    rgba(248, 113, 113, .16);
+    --warn:      #fbbf24;
+    --warn-bg:   rgba(251, 191, 36, .14);
+
+    --mark-phoneme:  #c4b5fd;
+    --mark-spelling: #9ca3af;
+    --stress-bg:     rgba(96, 165, 250, .20);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+kbd {
+  font-family: var(--mono);
+  font-size: .72em;
+  padding: .1em .35em;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--panel-2);
+  color: var(--fg-dim);
+  white-space: nowrap;
+}
+
+.app {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1.6rem 1.5rem 3rem;
+}
+
+/* ---------- 헤더 ---------- */
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -.01em;
+}
+
+.tagline {
+  margin: .15rem 0 0;
+  color: var(--fg-dim);
+  font-size: .85rem;
+}
+
+/* ---------- 버튼 ---------- */
+
+.btn {
+  font: inherit;
+  font-size: .85rem;
+  padding: .45rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.btn:hover { background: var(--panel-2); }
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+}
+.btn.primary kbd { background: rgba(255,255,255,.18); color: inherit; border-color: transparent; }
+.btn.ghost { background: transparent; }
+
+/* 포커스 표시를 지우지 않는다 (접근성) */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- 설정 바 ---------- */
+
+.control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.1rem;
+  padding: 1rem 0 .9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.ctl-group { display: flex; flex-direction: column; gap: .28rem; }
+.ctl-group.toggles { flex-direction: row; gap: .5rem; margin-left: auto; align-self: flex-end; }
+
+.ctl-label {
+  font-size: .74rem;
+  color: var(--fg-dim);
+  letter-spacing: .02em;
+}
+
+select {
+  font: inherit;
+  font-size: .85rem;
+  padding: .35rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--fg);
+  min-width: 7.5rem;
+}
+
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.seg-btn {
+  font: inherit;
+  font-size: .85rem;
+  padding: .35rem .9rem;
+  border: 0;
+  background: var(--panel);
+  color: var(--fg-dim);
+  cursor: pointer;
+}
+.seg-btn + .seg-btn { border-left: 1px solid var(--line); }
+.seg-btn.on { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+/* ---------- 토글 ----------
+   상태를 색이 아니라 텍스트로도 표시한다 (AC-12.7, NFR-008) */
+
+.toggle {
+  font: inherit;
+  font-size: .82rem;
+  padding: .4rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--fg-dim);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+.toggle .toggle-name { font-weight: 600; }
+.toggle .toggle-state {
+  font-size: .74rem;
+  padding: .05rem .35rem;
+  border-radius: 4px;
+  background: var(--panel-2);
+}
+.toggle.on {
+  border-color: var(--accent);
+  color: var(--fg);
+  background: var(--stress-bg);
+}
+.toggle.on .toggle-state {
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 700;
+}
+
+/* ---------- 안내 슬롯 ----------
+   높이를 항상 확보하여, 안내가 나타나도 연습 영역이 밀리지 않게 한다 */
+
+.notice-slot { min-height: 2.9rem; padding: .55rem 0 0; }
+
+.notice {
+  font-size: .85rem;
+  padding: .45rem .75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--fg-dim);
+}
+.notice.warn  { border-color: var(--warn); background: var(--warn-bg); color: var(--fg); }
+.notice.error { border-color: var(--err);  background: var(--err-bg);  color: var(--fg); }
+.notice[hidden] { display: none; }
+
+/* ---------- 결과 패널 ---------- */
+
+.result-panel {
+  margin-top: 1.4rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.result-panel[hidden] { display: none; }
+
+.result-stats { display: flex; gap: 1.8rem; flex-wrap: wrap; }
+.result-stats .stat { display: flex; flex-direction: column; align-items: flex-start; }
+.result-stats b { font-size: 1.6rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.result-stats span { font-size: .75rem; color: var(--fg-dim); }
+
+.result-actions { display: flex; gap: .5rem; }
+
+/* ---------- 단축키 안내 ---------- */
+
+.shortcut-guide {
+  margin-top: 1.6rem;
+  padding-top: .9rem;
+  border-top: 1px solid var(--line);
+  font-size: .8rem;
+  color: var(--fg-dim);
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem 1.1rem;
+}
+.shortcut-guide span { display: inline-flex; align-items: center; gap: .3rem; }
+
+/* ---------- 범례 모달 ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  max-width: 54rem;
+  width: 100%;
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head h2 { margin: 0; font-size: 1.05rem; }
+.modal-body { padding: .5rem 1.1rem 1rem; overflow-y: auto; }
+.modal-foot {
+  margin: 0;
+  padding: .7rem 1.1rem;
+  border-top: 1px solid var(--line);
+  font-size: .8rem;
+  color: var(--fg-dim);
+}
+
+.legend-section h3 {
+  font-size: .85rem;
+  margin: 1rem 0 .4rem;
+  color: var(--fg-dim);
+  letter-spacing: .02em;
+}
+.legend-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.legend-table th, .legend-table td {
+  border: 1px solid var(--line);
+  padding: .38rem .55rem;
+  text-align: left;
+  vertical-align: top;
+}
+.legend-table th { background: var(--panel-2); font-weight: 600; white-space: nowrap; }
+.legend-table td.sym {
+  font-family: var(--mono);
+  font-size: 1rem;
+  text-align: center;
+  color: var(--mark-phoneme);
+  font-weight: 700;
+}
+.legend-table tr.spelling td.sym { color: var(--mark-spelling); }
+.legend-table td.ex { color: var(--fg-dim); white-space: nowrap; }

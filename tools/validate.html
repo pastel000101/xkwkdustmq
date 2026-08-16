@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>콘텐츠 검증 — 영어 타자연습</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1a1a1a; --muted: #666;
+    --ok: #1b7f3b; --err: #c0392b; --warn: #b8860b;
+    --line: #ddd; --panel: #f7f7f7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16181c; --fg: #e6e6e6; --muted: #9aa0a6;
+      --ok: #4caf50; --err: #ef5350; --warn: #ffb300;
+      --line: #333; --panel: #1e2126;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem;
+    font-family: "Malgun Gothic", "맑은 고딕", system-ui, sans-serif;
+    background: var(--bg); color: var(--fg); line-height: 1.6;
+  }
+  h1 { font-size: 1.4rem; margin: 0 0 .3rem; }
+  h2 { font-size: 1.05rem; margin: 2rem 0 .6rem; padding-bottom: .3rem; border-bottom: 1px solid var(--line); }
+  .sub { color: var(--muted); font-size: .85rem; margin-bottom: 1.5rem; }
+  .verdict { font-size: 1.15rem; font-weight: 700; padding: .8rem 1rem; border-radius: 6px; background: var(--panel); }
+  .verdict.pass { color: var(--ok); }
+  .verdict.fail { color: var(--err); }
+  .stats { display: flex; flex-wrap: wrap; gap: .8rem; margin: 1rem 0; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: .5rem .9rem; font-size: .85rem; }
+  .stat b { display: block; font-size: 1.2rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  th, td { border: 1px solid var(--line); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+  th { background: var(--panel); }
+  td.msg { white-space: pre-wrap; font-family: Consolas, monospace; font-size: .8rem; }
+  .sev-error { color: var(--err); font-weight: 700; }
+  .sev-warning { color: var(--warn); font-weight: 700; }
+  .case-ok { color: var(--ok); }
+  .case-fail { color: var(--err); font-weight: 700; }
+  .empty { color: var(--muted); padding: .8rem 0; }
+  .note { background: var(--panel); border-left: 3px solid var(--muted); padding: .7rem 1rem; font-size: .85rem; margin: 1rem 0; }
+  .wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>콘텐츠 검증</h1>
+<div class="sub">
+  <code>docs/pronunciation-rules.md</code> 의 규칙과 데이터의 일치를 검사합니다.
+  이 검증이 담보하는 것은 <b>규칙과의 일관성</b>이며, 발음의 절대적 정확성은 아닙니다.
+</div>
+
+<h2>1. 검증기 자체 테스트</h2>
+<div class="note">
+  검증기가 실제로 오류를 잡아내는지 먼저 확인합니다.
+  <b>이 테스트가 실패하면 아래 검증 결과를 믿을 수 없습니다.</b>
+</div>
+<div id="selftest-verdict" class="verdict" data-testid="selftest-verdict">실행 중…</div>
+<div class="wrap"><table id="selftest-table" data-testid="selftest-table">
+  <thead><tr><th style="width:5rem">결과</th><th>케이스</th><th>비고</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+
+<h2>2. 데이터 검증</h2>
+<div id="verdict" class="verdict" data-testid="validation-verdict">실행 중…</div>
+<div class="stats" id="stats" data-testid="validation-stats"></div>
+
+<h2>3. 위반 목록</h2>
+<div class="wrap"><table id="violations" data-testid="violation-table">
+  <thead><tr>
+    <th style="width:5.5rem">심각도</th>
+    <th style="width:6rem">항목</th>
+    <th style="width:7rem">필드</th>
+    <th style="width:6rem">규칙</th>
+    <th>메시지</th>
+  </tr></thead>
+  <tbody></tbody>
+</table></div>
+<div id="no-violations" class="empty" style="display:none">위반 없음.</div>
+
+<h2>4. 분포</h2>
+<div class="stats" id="distribution" data-testid="distribution"></div>
+
+<!-- 데이터 -->
+<script src="../data/phoneme-guide.js"></script>
+<script src="../data/words.js"></script>
+<script src="../data/sentences.js"></script>
+<!-- 검증 -->
+<script src="validate-content.js"></script>
+<script src="validator-self-test.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---- 1. 자체 테스트 ---- */
+  var self = ValidatorSelfTest.runAll();
+  var sv = document.getElementById('selftest-verdict');
+  sv.textContent = self.failed === 0
+    ? '통과 — ' + self.passed + '/' + self.total + ' 케이스'
+    : '실패 — ' + self.failed + '건 실패 (' + self.passed + '/' + self.total + ' 통과)';
+  sv.className = 'verdict ' + (self.failed === 0 ? 'pass' : 'fail');
+
+  var stBody = document.querySelector('#selftest-table tbody');
+  self.details.forEach(function (d) {
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="' + (d.ok ? 'case-ok' : 'case-fail') + '">' + (d.ok ? 'PASS' : 'FAIL') + '</td>' +
+      '<td></td><td class="msg"></td>';
+    tr.children[1].textContent = d.name;
+    tr.children[2].textContent = d.reason;
+    stBody.appendChild(tr);
+  });
+
+  /* ---- 2. 데이터 검증 ---- */
+  var report = ContentValidator.validateAll(window.APP_DATA);
+
+  var v = document.getElementById('verdict');
+  v.textContent = report.ok
+    ? '통과 — error 위반 0건'
+    : '실패 — error ' + report.summary.error + '건';
+  v.className = 'verdict ' + (report.ok ? 'pass' : 'fail');
+
+  var stats = document.getElementById('stats');
+  [
+    ['단어', report.total.words],
+    ['문장', report.total.sentences],
+    ['error', report.summary.error],
+    ['warning', report.summary.warning]
+  ].forEach(function (p) {
+    var d = document.createElement('div');
+    d.className = 'stat';
+    d.innerHTML = '<b></b>';
+    d.firstChild.textContent = p[1];
+    d.appendChild(document.createTextNode(p[0]));
+    stats.appendChild(d);
+  });
+
+  /* ---- 3. 위반 목록 ---- */
+  var vb = document.querySelector('#violations tbody');
+  if (report.violations.length === 0) {
+    document.getElementById('violations').style.display = 'none';
+    document.getElementById('no-violations').style.display = 'block';
+  } else {
+    report.violations.forEach(function (x) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="sev-' + x.severity + '"></td><td></td><td></td><td></td><td class="msg"></td>';
+      tr.children[0].textContent = x.severity;
+      tr.children[1].textContent = x.itemId;
+      tr.children[2].textContent = x.field;
+      tr.children[3].textContent = x.rule;
+      tr.children[4].textContent = x.message;
+      vb.appendChild(tr);
+    });
+  }
+
+  /* ---- 4. 분포 ---- */
+  var dist = document.getElementById('distribution');
+  function addStat(label, value) {
+    var d = document.createElement('div');
+    d.className = 'stat';
+    d.innerHTML = '<b></b>';
+    d.firstChild.textContent = value;
+    d.appendChild(document.createTextNode(label));
+    dist.appendChild(d);
+  }
+  Object.keys(report.byLevel).forEach(function (k) { addStat(k, report.byLevel[k]); });
+  Object.keys(report.byCategory).forEach(function (k) { addStat(k, report.byCategory[k]); });
+})();
+</script>
+
+</body>
+</html>

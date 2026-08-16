@@ -1,0 +1,192 @@
+/* ============================================================
+ * practice.css — 연습 영역
+ * ------------------------------------------------------------
+ * 이 파일의 핵심 원칙 두 가지:
+ *
+ * 1) 모든 층의 높이가 내용과 무관하게 고정이다.
+ *    표시가 있든 없든, 토글이 켜졌든 꺼졌든
+ *    영어 줄의 세로 위치가 절대 변하지 않는다 (FR-025).
+ *
+ * 2) 토글은 visibility 만 바꾼다. display:none 을 쓰지 않는다.
+ *    display:none 은 요소를 레이아웃에서 빼서 주변을 밀어버린다 (WR-LAY05).
+ * ============================================================ */
+
+.practice-area {
+  margin-top: 1.2rem;
+  padding: 1.6rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  min-height: 12rem;
+}
+
+/* ---------- 그룹 ----------
+   연음 단위. span:1 이면 단어 하나.
+   그룹 내부에서는 줄바꿈되지 않는다 (WR-SPAN05).
+   줄바꿈은 그룹 사이의 공백에서만 일어난다. */
+
+.groups {
+  line-height: 1.35;
+  word-spacing: 0;
+}
+
+.group {
+  display: inline-block;
+  vertical-align: top;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* ---------- 발음 슬롯 (3층 고정 높이) ----------
+   .mk-above  음소 표시   — 글자 위,   여러 개면 나란히
+   .mk-char   한글 글자   — 강세면 굵게 + 배경
+   .mk-below  철자 정보   — 글자 아래, 다른 색            */
+
+.pron-slot {
+  display: block;
+  height: 3.1rem;               /* 0.85 + 1.5 + 0.75 */
+  white-space: nowrap;
+}
+
+.syl {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.mk-above {
+  display: flex;
+  gap: .16rem;
+  height: .85rem;               /* 내용이 없어도 유지 (WR-MK06) */
+  line-height: .85rem;
+  font-size: .62rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--mark-phoneme);
+}
+
+.mk-char {
+  height: 1.5rem;
+  line-height: 1.5rem;
+  font-size: 1.05rem;
+  color: var(--fg-dim);
+  padding: 0 .06rem;
+}
+
+/* 강세 — 글자 자체를 강조 (WR-MK02) */
+.mk-char.stressed {
+  font-weight: 700;
+  color: var(--fg);
+  background: var(--stress-bg);
+  border-radius: 4px;
+}
+
+.mk-below {
+  display: flex;
+  gap: .14rem;
+  height: .75rem;               /* 내용이 없어도 유지 */
+  line-height: .75rem;
+  font-size: .6rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--mark-spelling);  /* 음소와 다른 색 (U2-3) */
+}
+
+/* ---------- 영어 줄 (타이핑 대상) ---------- */
+
+.en-row {
+  display: block;
+  height: 2.6rem;
+  line-height: 2.6rem;
+  font-size: 1.65rem;
+  font-family: var(--mono);
+  white-space: nowrap;
+  letter-spacing: .01em;
+}
+
+/* 그룹 사이 공백 — 여기서만 줄바꿈이 일어난다 (WR-SPAN06) */
+.gap {
+  display: inline-block;
+  vertical-align: top;
+  height: 5.9rem;               /* pron-slot 3.1 + en-row 2.6 정렬용 */
+}
+.gap .en-row { display: block; }
+
+/* ---------- 문자 4상태 (Q2 = A) ----------
+   색만으로 구분하지 않는다 (NFR-008).
+   흑백으로 렌더링해도 네 상태가 구분되어야 한다. */
+
+.ch {
+  display: inline-block;
+  position: relative;
+  white-space: pre;             /* 공백 문자가 접히지 않게 */
+  opacity: .32;                 /* 미입력: 낮은 밝기 */
+  color: var(--fg);
+}
+
+.ch.ok {
+  opacity: 1;                   /* 정답: 높은 밝기 */
+}
+
+.ch.bad {
+  opacity: 1;
+  color: var(--err);
+  background: var(--err-bg);
+  border-radius: 3px;
+  /* 색상 외 단서: 물결 밑줄 */
+  text-decoration: underline wavy var(--err);
+  text-underline-offset: .18em;
+  text-decoration-thickness: 1.5px;
+}
+
+/* 공백 오답은 글자가 없어 밑줄이 안 보인다 → 배경 블록으로 표시 */
+.ch.space.bad {
+  background: var(--err-bg);
+  box-shadow: inset 0 0 0 1px var(--err);
+}
+
+/* 현재 위치: 색이 아닌 형태(세로 막대)로 표시 */
+.ch.cur::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: .55rem;
+  bottom: .55rem;
+  width: 2px;
+  background: var(--accent);
+  animation: caret-blink 1.05s step-end infinite;
+}
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch.cur::before { animation: none; }
+}
+
+/* ---------- 뜻 줄 ---------- */
+
+.meaning-layer {
+  height: 2rem;
+  line-height: 2rem;
+  margin-top: .9rem;
+  padding-top: .5rem;
+  border-top: 1px dashed var(--line);
+  font-size: .95rem;
+  color: var(--fg-dim);
+}
+
+/* ---------- 토글 (WR-LAY03) ----------
+   visibility 만 바꾼다. 자리는 그대로 유지된다.
+   display:none 을 쓰면 영어 줄이 위아래로 튄다. */
+
+.practice-area.hide-pron .pron-slot     { visibility: hidden; }
+.practice-area.hide-meaning .meaning-layer { visibility: hidden; }
+
+/* ---------- 콘텐츠 없음 / 로드 실패 시 ---------- */
+
+.practice-area.inactive .groups,
+.practice-area.inactive .meaning-layer { opacity: .25; }

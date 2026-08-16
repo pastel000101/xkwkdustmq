@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>로직 테스트 — 영어 타자연습</title>
+<style>
+  :root { --bg:#fff; --fg:#16181d; --dim:#5c6270; --ok:#15803d; --err:#c62828; --line:#dfe1e6; --panel:#f5f6f8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#14161a; --fg:#e8eaed; --dim:#9aa1ac; --ok:#4ade80; --err:#f87171; --line:#333842; --panel:#1b1e24; }
+  }
+  body { margin:0; padding:2rem; background:var(--bg); color:var(--fg);
+         font-family:"Malgun Gothic","맑은 고딕",system-ui,sans-serif; line-height:1.6; }
+  h1 { font-size:1.3rem; margin:0 0 .3rem; }
+  .sub { color:var(--dim); font-size:.85rem; margin-bottom:1.4rem; }
+  .verdict { font-size:1.15rem; font-weight:700; padding:.8rem 1rem; border-radius:6px; background:var(--panel); }
+  .verdict.pass { color:var(--ok); }
+  .verdict.fail { color:var(--err); }
+  table { border-collapse:collapse; width:100%; font-size:.85rem; margin-top:1.2rem; }
+  th,td { border:1px solid var(--line); padding:.35rem .6rem; text-align:left; vertical-align:top; }
+  th { background:var(--panel); }
+  td.r { width:4.5rem; font-weight:700; }
+  .p { color:var(--ok); } .f { color:var(--err); }
+  td.why { font-family:Consolas,monospace; font-size:.8rem; white-space:pre-wrap; color:var(--err); }
+  .note { background:var(--panel); border-left:3px solid var(--dim); padding:.7rem 1rem; font-size:.85rem; margin:1rem 0; }
+</style>
+</head>
+<body>
+
+<h1>로직 테스트</h1>
+<div class="sub">DOM 없이 검증 가능한 순수 로직만 확인합니다. 렌더링 결과는 <code>index.html</code> 에서 눈으로 봅니다.</div>
+
+<div class="note">
+  <b>이 테스트가 잡는 것</b><br>
+  "지운 오타도 집계에 남는가", "타이머가 첫 문자에서 시작하는가", "Ctrl+C 가 오타로 세어지지 않는가" 같은 것들입니다.
+  <b>화면만 봐서는 정상으로 보이는데 숫자만 틀리는</b> 유형이라 자동 테스트로만 잡힙니다.
+</div>
+
+<div id="verdict" class="verdict" data-testid="logic-verdict">실행 중…</div>
+
+<table data-testid="logic-table">
+  <thead><tr><th class="r">결과</th><th>케이스</th><th>실패 사유</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+
+<!-- 실데이터 렌더링 구조 확인을 위해 데이터도 로드한다 -->
+<script src="../data/phoneme-guide.js"></script>
+<script src="../data/words.js"></script>
+<script src="../data/sentences.js"></script>
+
+<script src="../js/app-state.js"></script>
+<script src="../js/content-store.js"></script>
+<script src="../js/typing-engine.js"></script>
+<script src="../js/stats-tracker.js"></script>
+<script src="../js/practice-layout.js"></script>
+<script src="../js/text-renderer.js"></script>
+<script src="../js/annotation-renderer.js"></script>
+<script src="../js/result-view.js"></script>
+<script src="../js/control-panel.js"></script>
+<script src="../js/legend-view.js"></script>
+<script src="../js/input-handler.js"></script>
+<script src="../js/settings-service.js"></script>
+<script src="../js/practice-session-service.js"></script>
+<script src="../js/bootstrap-service.js"></script>
+<script src="app-logic-test.js"></script>
+
+<script>
+(function () {
+  var r = App.LogicTest.runAll();
+  var v = document.getElementById('verdict');
+  v.textContent = r.failed === 0
+    ? '통과 — ' + r.passed + '/' + r.total + ' 케이스'
+    : '실패 — ' + r.failed + '건 (' + r.passed + '/' + r.total + ' 통과)';
+  v.className = 'verdict ' + (r.failed === 0 ? 'pass' : 'fail');
+
+  var tb = document.getElementById('rows');
+  r.details.forEach(function (d) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="r"></td><td></td><td class="why"></td>';
+    tr.children[0].textContent = d.ok ? 'PASS' : 'FAIL';
+    tr.children[0].className = 'r ' + (d.ok ? 'p' : 'f');
+    tr.children[1].textContent = d.name;
+    tr.children[2].textContent = d.reason;
+    tb.appendChild(tr);
+  });
+})();
+</script>
+
+</body>
+</html>
