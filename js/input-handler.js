@@ -20,18 +20,30 @@
   var composing = false;
   var bound = null;
 
+  /* yieldToControl: 버튼·링크·폼 컨트롤에 포커스가 있을 때는 가로채지 않는다.
+   *   Enter 를 무조건 가로채면 키보드로 버튼을 누를 수 없게 된다.
+   *   Tab 은 반대로 항상 가로채면 포커스 이동이 막히므로 단축키로 쓰지 않고
+   *   브라우저 기본 동작(포커스 이동)에 맡긴다. */
   var SHORTCUT_KEYS = {
-    'Tab':    { action: 'next',                prevent: true  },
-    'Escape': { action: 'escape',              prevent: false },
-    'F2':     { action: 'togglePronunciation', prevent: true  },
-    'F4':     { action: 'toggleMeaning',       prevent: true  },
-    'F9':     { action: 'legend',              prevent: true  }
+    'Enter':  { action: 'next',                prevent: true,  yieldToControl: true },
+    'Escape': { action: 'escape',              prevent: false, yieldToControl: false },
+    'F2':     { action: 'togglePronunciation', prevent: true,  yieldToControl: false },
+    'F4':     { action: 'toggleMeaning',       prevent: true,  yieldToControl: false },
+    'F9':     { action: 'legend',              prevent: true,  yieldToControl: false }
   };
 
+  /* 문자 입력을 넘겨줄 대상 — 여기에 포커스가 있으면 타이핑으로 처리하지 않는다 */
   var FORM_TAGS = ['INPUT', 'SELECT', 'TEXTAREA'];
+
+  /* 키보드로 활성화되는 요소 — Enter 를 양보할 대상 */
+  var INTERACTIVE_TAGS = ['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON', 'A'];
 
   function isFormControl(node) {
     return node && FORM_TAGS.indexOf(node.tagName) !== -1;
+  }
+
+  function isInteractive(node) {
+    return node && INTERACTIVE_TAGS.indexOf(node.tagName) !== -1;
   }
 
   /* WR-IME05 — 브라우저마다 IME 신호가 달라 셋을 함께 본다 */
@@ -57,6 +69,9 @@
     /* 3~7. 단축키 (전부 문자가 아닌 키) */
     var sc = SHORTCUT_KEYS[e.key];
     if (sc) {
+      /* 버튼에 포커스가 있는데 Enter 를 가로채면 그 버튼을 누를 수 없다.
+         이 경우에는 브라우저 기본 동작에 맡긴다. */
+      if (sc.yieldToControl && isInteractive(e.target)) return;
       if (sc.prevent) e.preventDefault();
       if (handlers.onShortcut) handlers.onShortcut(sc.action);
       return;
@@ -118,7 +133,11 @@
     _classify: function (e) {
       if (isComposingEvent(e)) return 'ime';
       if (e.key === 'Backspace') return 'backspace';
-      if (SHORTCUT_KEYS[e.key]) return 'shortcut:' + SHORTCUT_KEYS[e.key].action;
+      var sc = SHORTCUT_KEYS[e.key];
+      if (sc) {
+        if (sc.yieldToControl && isInteractive(e.target)) return 'yield';
+        return 'shortcut:' + sc.action;
+      }
       if (e.ctrlKey || e.altKey || e.metaKey) return 'ignore';
       if (e.key.length === 1) return 'char';
       return 'ignore';

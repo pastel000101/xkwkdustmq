@@ -385,11 +385,23 @@
   });
 
   test('입력 분류 — 단축키 (AC-07.1~07.6)', function () {
-    eq(App.InputHandler._classify({ key: 'Tab' }), 'shortcut:next');
+    eq(App.InputHandler._classify({ key: 'Enter' }), 'shortcut:next');
     eq(App.InputHandler._classify({ key: 'Escape' }), 'shortcut:escape');
     eq(App.InputHandler._classify({ key: 'F2' }), 'shortcut:togglePronunciation');
     eq(App.InputHandler._classify({ key: 'F4' }), 'shortcut:toggleMeaning');
     eq(App.InputHandler._classify({ key: 'F9' }), 'shortcut:legend');
+  });
+
+  test('⚠️ 버튼에 포커스가 있으면 Enter 를 가로채지 않는다', function () {
+    /* 가로채면 키보드로 "다시하기" 버튼을 누를 수 없게 된다.
+       Enter 가 항상 "다음 문항"이 되어버려 버튼이 무력화된다. */
+    eq(App.InputHandler._classify({ key: 'Enter', target: { tagName: 'BUTTON' } }), 'yield');
+    eq(App.InputHandler._classify({ key: 'Enter', target: { tagName: 'SELECT' } }), 'yield');
+    eq(App.InputHandler._classify({ key: 'Enter', target: { tagName: 'DIV' } }), 'shortcut:next');
+  });
+
+  test('Tab 은 단축키가 아니다 — 포커스 이동에 맡긴다', function () {
+    eq(App.InputHandler._classify({ key: 'Tab' }), 'ignore');
   });
 
   test('입력 분류 — 백스페이스', function () {

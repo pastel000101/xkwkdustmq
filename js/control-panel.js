@@ -22,7 +22,7 @@
   var ORDER_LABEL = { random: '무작위', sequential: '순서대로' };
 
   var SHORTCUTS = [
-    ['Tab', '다음 문항'],
+    ['Enter', '다음 문항'],
     ['Esc', '다시하기'],
     ['F2', '발음 켜기/끄기'],
     ['F4', '뜻 켜기/끄기'],
