@@ -1,7 +1,7 @@
 /* ============================================================
- * practice.css — 연습 영역
+ * practice.css — 연습 영역 (파스텔)
  * ------------------------------------------------------------
- * 이 파일의 핵심 원칙 두 가지:
+ * 색을 바꿔도 아래 두 원칙은 그대로다. 이것이 깨지면 요구사항이 깨진다.
  *
  * 1) 모든 층의 높이가 내용과 무관하게 고정이다.
  *    표시가 있든 없든, 토글이 켜졌든 꺼졌든
@@ -9,15 +9,21 @@
  *
  * 2) 토글은 visibility 만 바꾼다. display:none 을 쓰지 않는다.
  *    display:none 은 요소를 레이아웃에서 빼서 주변을 밀어버린다 (WR-LAY05).
+ *
+ * 그리고 파스텔이라도 정오 구분은 색에만 기대지 않는다 (NFR-008).
+ * 오답은 물결 밑줄 + 배경, 커서는 세로 막대, 미입력은 낮은 불투명도.
+ * 흑백으로 렌더링해도 네 상태가 구분되어야 한다.
  * ============================================================ */
 
 .practice-area {
   margin-top: 1.2rem;
-  padding: 1.6rem 1.4rem;
+  padding: 2rem 1.6rem 1.6rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 16px;
   background: var(--panel);
-  min-height: 12rem;
+  background-image: linear-gradient(170deg, var(--accent-bg) 0%, transparent 38%);
+  box-shadow: var(--shadow);
+  min-height: 13rem;
 }
 
 /* ---------- 그룹 ----------
@@ -44,8 +50,9 @@
 
 .pron-slot {
   display: block;
-  height: 3.1rem;               /* 0.85 + 1.5 + 0.75 */
+  height: 3.1rem;               /* 0.85 + 1.5 + 0.75 — 내용과 무관하게 고정 */
   white-space: nowrap;
+  transition: opacity .16s ease;
 }
 
 .syl {
@@ -64,14 +71,16 @@
   font-family: var(--mono);
   font-weight: 700;
   color: var(--mark-phoneme);
+  letter-spacing: .02em;
 }
 
 .mk-char {
   height: 1.5rem;
   line-height: 1.5rem;
-  font-size: 1.05rem;
+  font-size: 1.06rem;
   color: var(--fg-dim);
-  padding: 0 .06rem;
+  padding: 0 .1rem;
+  border-radius: 6px;
 }
 
 /* 강세 — 글자 자체를 강조 (WR-MK02) */
@@ -79,7 +88,6 @@
   font-weight: 700;
   color: var(--fg);
   background: var(--stress-bg);
-  border-radius: 4px;
 }
 
 .mk-below {
@@ -99,10 +107,10 @@
   display: block;
   height: 2.6rem;
   line-height: 2.6rem;
-  font-size: 1.65rem;
+  font-size: 1.68rem;
   font-family: var(--mono);
   white-space: nowrap;
-  letter-spacing: .01em;
+  letter-spacing: .015em;
 }
 
 /* 그룹 사이 공백 — 여기서만 줄바꿈이 일어난다 (WR-SPAN06) */
@@ -113,16 +121,18 @@
 }
 .gap .en-row { display: block; }
 
-/* ---------- 문자 4상태 (Q2 = A) ----------
-   색만으로 구분하지 않는다 (NFR-008).
-   흑백으로 렌더링해도 네 상태가 구분되어야 한다. */
+/* ---------- 문자 4상태 ----------
+   색만으로 구분하지 않는다 (NFR-008). */
 
 .ch {
   display: inline-block;
   position: relative;
   white-space: pre;             /* 공백 문자가 접히지 않게 */
-  opacity: .32;                 /* 미입력: 낮은 밝기 */
+  opacity: .3;                  /* 미입력: 낮은 밝기 */
   color: var(--fg);
+  border-radius: 4px;
+  /* 문자 상태에는 transition 을 걸지 않는다.
+     타이핑 피드백은 즉각적이어야 한다 (NFR-004). */
 }
 
 .ch.ok {
@@ -133,17 +143,16 @@
   opacity: 1;
   color: var(--err);
   background: var(--err-bg);
-  border-radius: 3px;
   /* 색상 외 단서: 물결 밑줄 */
-  text-decoration: underline wavy var(--err);
-  text-underline-offset: .18em;
+  text-decoration: underline wavy var(--err-line);
+  text-underline-offset: .2em;
   text-decoration-thickness: 1.5px;
 }
 
 /* 공백 오답은 글자가 없어 밑줄이 안 보인다 → 배경 블록으로 표시 */
 .ch.space.bad {
   background: var(--err-bg);
-  box-shadow: inset 0 0 0 1px var(--err);
+  box-shadow: inset 0 0 0 1.5px var(--err-line);
 }
 
 /* 현재 위치: 색이 아닌 형태(세로 막대)로 표시 */
@@ -151,9 +160,10 @@
   content: "";
   position: absolute;
   left: -1px;
-  top: .55rem;
-  bottom: .55rem;
-  width: 2px;
+  top: .5rem;
+  bottom: .5rem;
+  width: 2.5px;
+  border-radius: 2px;
   background: var(--accent);
   animation: caret-blink 1.05s step-end infinite;
 }
@@ -163,30 +173,39 @@
   50%      { opacity: 0; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .ch.cur::before { animation: none; }
-}
-
 /* ---------- 뜻 줄 ---------- */
 
 .meaning-layer {
   height: 2rem;
   line-height: 2rem;
-  margin-top: .9rem;
-  padding-top: .5rem;
+  margin-top: 1rem;
+  padding: .5rem .9rem 0;
   border-top: 1px dashed var(--line);
   font-size: .95rem;
   color: var(--fg-dim);
+  transition: opacity .16s ease;
 }
 
 /* ---------- 토글 (WR-LAY03) ----------
    visibility 만 바꾼다. 자리는 그대로 유지된다.
-   display:none 을 쓰면 영어 줄이 위아래로 튄다. */
+   display:none 을 쓰면 영어 줄이 위아래로 튄다.
+   opacity 는 부드럽게 사라지도록 곁들인 것이며 레이아웃에 영향이 없다. */
 
-.practice-area.hide-pron .pron-slot     { visibility: hidden; }
-.practice-area.hide-meaning .meaning-layer { visibility: hidden; }
+.practice-area.hide-pron .pron-slot {
+  visibility: hidden;
+  opacity: 0;
+}
+.practice-area.hide-meaning .meaning-layer {
+  visibility: hidden;
+  opacity: 0;
+}
 
 /* ---------- 콘텐츠 없음 / 로드 실패 시 ---------- */
 
 .practice-area.inactive .groups,
-.practice-area.inactive .meaning-layer { opacity: .25; }
+.practice-area.inactive .meaning-layer { opacity: .22; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch.cur::before { animation: none; }
+  .pron-slot, .meaning-layer { transition: none; }
+}
